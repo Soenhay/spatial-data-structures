@@ -1,7 +1,7 @@
 var figlet = require('figlet');
 var fs = require('fs');
 const csv = require('fast-csv');
-var kdTree = require('kd-tree-javascript');//https://www.npmjs.com/package/kd-tree-javascript
+var kdTree = require('./lib/myKdTree_1');
 
 const appConfig = require('./config/config.json');
 const log4Js = require('log4js');
@@ -22,21 +22,7 @@ const readCsvFileToObj = function (fn, callback) {
         });
 }
 
-/*
-https://stackoverflow.com/questions/70477163/calculate-height-depth-of-binary-tree-javascript
-https://stackabuse.com/javascript-check-if-variable-is-a-undefined-or-null/
-*/
-const treeHeight = function (tree) {
-    return 1 + Math.max(
-        tree.root != null ? treeHeight(tree.root) : -1,
-        tree.left != null ? treeHeight(tree.left) : -1,
-        tree.right != null ? treeHeight(tree.right) : -1
-    );
-}
 
-const range = function(lo, hi, visit){
-
-}
 
 const main = function () {
     // print process.argv
@@ -67,15 +53,14 @@ const main = function () {
         // Create a new tree from a list of points, a distance function, and a
         // list of dimensions.
         var tree = new kdTree.kdTree(points, distance, dimensions);
-        tree.range = range;
 
         var nearest = tree.nearest({ X: 5, Y: 5 }, 2);
 
         console.log(nearest);
 
-        console.log(tree);
+        //console.log(tree);
         console.log(`The balance factor: ${tree.balanceFactor()}`);
-        console.log(`The height: ${treeHeight(tree)}`);
+        console.log(`The height: ${tree.treeHeight()}`);
         console.log(`The min height:`);
 
         //TODO: make a function to search for points in a range.
