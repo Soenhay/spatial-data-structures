@@ -34,6 +34,10 @@ const treeHeight = function (tree) {
     );
 }
 
+const range = function(lo, hi, visit){
+
+}
+
 const main = function () {
     // print process.argv
     process.argv.forEach(function (val, index, array) {
@@ -63,6 +67,7 @@ const main = function () {
         // Create a new tree from a list of points, a distance function, and a
         // list of dimensions.
         var tree = new kdTree.kdTree(points, distance, dimensions);
+        tree.range = range;
 
         var nearest = tree.nearest({ X: 5, Y: 5 }, 2);
 
@@ -72,6 +77,11 @@ const main = function () {
         console.log(`The balance factor: ${tree.balanceFactor()}`);
         console.log(`The height: ${treeHeight(tree)}`);
         console.log(`The min height:`);
+
+        //TODO: make a function to search for points in a range.
+        tree.range([-102.7027,27.20032,null,null], [-94.32688,32.02732,null,null], function(idx) {
+            console.log("visit:", idx)  //idx = index of point in points array
+          });
     });
 };
 
