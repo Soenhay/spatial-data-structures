@@ -18,7 +18,7 @@ kdTree.kdTree.prototype.treeHeight = function(){
 }
 
 /*
-* Custom range function.
+* Custom range function to return the points within the range.
 * @param {array} lo - Array of values [BX, BY, BC, BP] where [BX, BY] represents the lower left corner of the window. [BC] and [BP] represent the lower limit of the range for the associated attributes.
 * @param {array} hi - Array of values [EX, EY, EC, EP] where [EX, EY] represents the upper right corner of the window. [EC] and [EP] represent the upper limit of the range for the associated attributes.
 * @param {function} visit - function for checking whether or not a point is with the range.
