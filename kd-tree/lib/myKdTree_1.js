@@ -17,7 +17,12 @@ kdTree.kdTree.prototype.treeHeight = function(){
     return treeHeight(this);
 }
 
-//Add our custom range function to the module.
+/*
+* Custom range function.
+* @param {array} lo - Array of values [BX, BY, BC, BP] where [BX, BY] represents the lower left corner of the window. [BC] and [BP] represent the lower limit of the range for the associated attributes.
+* @param {array} hi - Array of values [EX, EY, EC, EP] where [EX, EY] represents the upper right corner of the window. [EC] and [EP] represent the upper limit of the range for the associated attributes.
+* @param {function} visit - function for checking whether or not a point is with the range.
+*/
 kdTree.kdTree.prototype.range = function(lo, hi, visit){
     console.log('ranged');
     //console.log(this.root);
