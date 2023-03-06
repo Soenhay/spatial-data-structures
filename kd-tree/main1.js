@@ -7,6 +7,8 @@ const appConfig = require('./config/config.json');
 const log4Js = require('log4js');
 const log4JsConfig = require('./config/log4js.json');
 
+var path = require("path");
+
 const readCsvFileToObj = function (fn, callback) {
     //https://stackoverflow.com/questions/59299172/how-to-read-a-csv-file-and-store-it-in-and-array-of-objects
     let results = [];
@@ -22,7 +24,13 @@ const readCsvFileToObj = function (fn, callback) {
         });
 }
 
-
+function initializeOutputDirectory() {
+    const exists = fs.existsSync('./kd-tree/output');
+    if (exists === true) {
+        return;
+    }
+    fs.mkdirSync('./kd-tree/output')
+}
 
 const main = function () {
     // print process.argv
@@ -34,13 +42,16 @@ const main = function () {
     log4Js.configure(log4JsConfig);
     this.logger = log4Js.getLogger();
 
+    //Init output dir
+    initializeOutputDirectory();
+
     //Display title
     this.logger.info('\r\n' + figlet.textSync(appConfig.appName));
 
 
     //Load data
     //X,Y,NAME,ST,POPULATION
-    readCsvFileToObj("data/USA_Major_Cities_pop.csv", function (resultObj) {
+    readCsvFileToObj("kd-tree/data/USA_Major_Cities_pop.csv", function (resultObj) {
         //console.log(resultObj);
 
         var points = resultObj;
@@ -61,12 +72,25 @@ const main = function () {
         //console.log(tree);
         console.log(`The balance factor: ${tree.balanceFactor()}`);
         console.log(`The height: ${tree.treeHeight()}`);
-        console.log(`The min height:`);
+        console.log(`The node count: ${tree.treeNodeCount()}`);//3886
+        console.log(`The max height: ${tree.treeHeightMax()}`);
+        console.log(`The min height: ${tree.treeHeightMin()}`);
+
+        //Output the object to a json file:
+        let jsonFn = 'kd-tree/output/myjsonfile.json';
+        fs.writeFile(jsonFn, JSON.stringify(tree.toJSON()), 'utf8', function (err) {
+            if (err != null) {
+                console.log(err);
+            }
+            else {
+                console.log(`JSON output saved to ${path.resolve(jsonFn)}`);
+            }
+        });
 
         //TODO: make a function to search for points in a range.
-        tree.range([-102.7027,27.20032,null,null], [-94.32688,32.02732,null,null], function(idx) {
+        tree.range([-102.7027, 27.20032, null, null], [-94.32688, 32.02732, null, null], function (idx) {
             console.log("visit:", idx)  //idx = index of point in points array
-          });
+        });
     });
 };
 

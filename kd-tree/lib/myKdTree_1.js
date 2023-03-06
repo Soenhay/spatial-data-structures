@@ -13,8 +13,38 @@ const treeHeight = function (tree) {
     );
 }
 
-kdTree.kdTree.prototype.treeHeight = function(){
+kdTree.kdTree.prototype.treeHeight = function () {
     return treeHeight(this);
+}
+
+const treeNodeCount = function (tree) {
+    return tree.root != null ? (1
+    + (tree.root.left != null ? treeNodeCount(tree.root.left) : 0)
+    + (tree.root.right != null ? treeNodeCount(tree.root.right): 0)) : 0;
+
+    // if (tree.root != null) {
+    //     let l = (tree.root.left != null ? treeNodeCount(tree.root.left) : 0);
+    //     let r = (tree.root.right != null ? treeNodeCount(tree.root.right): 0);
+
+    //     return 1 + l + r;
+    // }
+    // else {
+    //     return 0;
+    // }
+}
+
+kdTree.kdTree.prototype.treeNodeCount = function () {
+    return treeNodeCount(this);
+}
+
+kdTree.kdTree.prototype.treeHeightMax = function () {
+    //n-1
+    return treeNodeCount(this) - 1;
+}
+
+kdTree.kdTree.prototype.treeHeightMin = function () {
+    //floor(log2n)
+    return Math.log2(treeNodeCount(this));
 }
 
 /*
@@ -23,7 +53,7 @@ kdTree.kdTree.prototype.treeHeight = function(){
 * @param {array} hi - Array of values [EX, EY, EC, EP] where [EX, EY] represents the upper right corner of the window. [EC] and [EP] represent the upper limit of the range for the associated attributes.
 * @param {function} visit - function for checking whether or not a point is with the range.
 */
-kdTree.kdTree.prototype.range = function(lo, hi, visit){
+kdTree.kdTree.prototype.range = function (lo, hi, visit) {
     console.log('ranged');
     //console.log(this.root);
 }
