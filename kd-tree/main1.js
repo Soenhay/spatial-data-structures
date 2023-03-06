@@ -64,6 +64,7 @@ const main = function () {
         // Create a new tree from a list of points, a distance function, and a
         // list of dimensions.
         var tree = new kdTree.kdTree(points, distance, dimensions);
+        tree.dimensions = dimensions;
 
         var nearest = tree.nearest({ X: 5, Y: 5 }, 2);
 
