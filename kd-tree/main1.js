@@ -9,6 +9,13 @@ const log4JsConfig = require('./config/log4js.json');
 
 var path = require("path");
 
+var inputPathAndFn = path.resolve("data/USA_Major_Cities_pop.csv");
+var outputPath = path.resolve("output");
+
+
+// console.log(inputPathAndFn)
+// console.log(outputPath)
+
 const readCsvFileToObj = function (fn, callback) {
     //https://stackoverflow.com/questions/59299172/how-to-read-a-csv-file-and-store-it-in-and-array-of-objects
     let results = [];
@@ -25,11 +32,23 @@ const readCsvFileToObj = function (fn, callback) {
 }
 
 function initializeOutputDirectory() {
-    const exists = fs.existsSync('./kd-tree/output');
+    const exists = fs.existsSync(outputPath);
     if (exists === true) {
         return;
     }
-    fs.mkdirSync('./kd-tree/output')
+    fs.mkdirSync(outputPath);
+}
+
+function outputJsonFile(fn, jsonObj){
+    let jsonFn =  path.resolve(outputPath, fn);
+    fs.writeFile(jsonFn, JSON.stringify(jsonObj), 'utf8', function (err) {
+        if (err != null) {
+            this.logger.info(err);
+        }
+        else {
+            this.logger.info(`JSON output saved to ${jsonFn}`);
+        }
+    });
 }
 
 const main = function () {
@@ -51,8 +70,8 @@ const main = function () {
 
     //Load data
     //X,Y,NAME,ST,POPULATION
-    readCsvFileToObj("kd-tree/data/USA_Major_Cities_pop.csv", function (resultObj) {
-        //console.log(resultObj);
+    readCsvFileToObj(inputPathAndFn, function (resultObj) {
+        //this.logger.info(resultObj);
 
         var points = resultObj;
         var dimensions = ["X", "Y", "NAME", "POPULATION"];
@@ -64,33 +83,36 @@ const main = function () {
         // Create a new tree from a list of points, a distance function, and a
         // list of dimensions.
         var tree = new kdTree.kdTree(points, distance, dimensions);
+        tree.logger = this.logger;
         tree.dimensions = dimensions;
 
-        var nearest = tree.nearest({ X: 5, Y: 5 }, 2);
+        // var nearest = tree.nearest({ X: 5, Y: 5 }, 2);
+        // this.logger.info(nearest);
 
-        console.log(nearest);
-
-        //console.log(tree);
-        console.log(`The balance factor: ${tree.balanceFactor()}`);
-        console.log(`The height: ${tree.treeHeight()}`);
-        console.log(`The node count: ${tree.treeNodeCount()}`);//3886
-        console.log(`The max height: ${tree.treeHeightMax()}`);
-        console.log(`The min height: ${tree.treeHeightMin()}`);
+        //this.logger.info(tree);
+        this.logger.info(`The balance factor: ${tree.balanceFactor()}`);
+        this.logger.info(`The height: ${tree.treeHeight()}`);
+        this.logger.info(`The node count: ${tree.treeNodeCount()}`);//3886
+        this.logger.info(`The max height: ${tree.treeHeightMax()}`);
+        this.logger.info(`The min height: ${tree.treeHeightMin()}`);
 
         //Output the object to a json file:
-        let jsonFn = 'kd-tree/output/myjsonfile.json';
-        fs.writeFile(jsonFn, JSON.stringify(tree.toJSON()), 'utf8', function (err) {
-            if (err != null) {
-                console.log(err);
-            }
-            else {
-                console.log(`JSON output saved to ${path.resolve(jsonFn)}`);
-            }
+        outputJsonFile("myJsonOutput.json", tree.toJSON());
+
+        
+        tree.range([-102.7027, 27.20032, null, null], [-94.32688, 32.02732, null, null], function (lo, hi, pointsInRange) {
+            this.logger.info(`The range lo:${lo}, hi:${hi} has the following (${pointsInRange.length}) points:`); 
+            outputJsonFile("data1.json", pointsInRange);
         });
 
-        //TODO: make a function to search for points in a range.
-        tree.range([-102.7027, 27.20032, null, null], [-94.32688, 32.02732, null, null], function (idx) {
-            console.log("visit:", idx)  //idx = index of point in points array
+        tree.range([-102.7027,27.20032,'C',null], [-94.32688,32.02732, 'H',null], function (lo, hi, pointsInRange) {
+            this.logger.info(`The range lo:${lo}, hi:${hi} has the following (${pointsInRange.length}) points:`); 
+            outputJsonFile("data2.json", pointsInRange);
+        });
+
+        tree.range([-102.7027,27.20032,'C', '50,000'],  [-94.32688,32.02732, 'H','500,000'], function (lo, hi, pointsInRange) {
+            this.logger.info(`The range lo:${lo}, hi:${hi} has the following (${pointsInRange.length}) points:`); 
+            outputJsonFile("data3.json", pointsInRange);
         });
     });
 };
