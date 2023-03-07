@@ -39,14 +39,14 @@ function initializeOutputDirectory() {
     fs.mkdirSync(outputPath);
 }
 
-function outputJsonFile(fn, jsonObj) {
-    let jsonFn = path.resolve(outputPath, fn);
-    fs.writeFile(jsonFn, JSON.stringify(jsonObj), 'utf8', function (err) {
+function outputFile(fn, contents) {
+    let pathAndFn = path.resolve(outputPath, fn);
+    fs.writeFile(pathAndFn, contents, 'utf8', function (err) {
         if (err != null) {
             this.logger.info(err);
         }
         else {
-            this.logger.info(`JSON output saved to ${jsonFn}`);
+            this.logger.info(`Output saved to ${pathAndFn}`);
         }
     });
 }
@@ -97,22 +97,22 @@ const main = function () {
         this.logger.info(`The min height: ${tree.treeHeightMin()}`);
 
         //Output the object to a json file:
-        outputJsonFile("myJsonOutput.json", tree.toJSON());
+        outputFile("myJsonOutput.json", JSON.stringify(tree.toJSON()));
 
 
         tree.range([-102.7027, 27.20032, null, null], [-94.32688, 32.02732, null, null], function (lo, hi, pointsInRange) {
             this.logger.info(`The range lo:${lo}, hi:${hi} has (${pointsInRange.length}) points.`);
-            outputJsonFile("data1.json", pointsInRange);
+            outputFile("data1.js", `let data1 = '${JSON.stringify(pointsInRange)}';`);
         });
 
         tree.range([-102.7027, 27.20032, 'C', null], [-94.32688, 32.02732, 'H', null], function (lo, hi, pointsInRange) {
             this.logger.info(`The range lo:${lo}, hi:${hi} has (${pointsInRange.length}) points.`);
-            outputJsonFile("data2.json", pointsInRange);
+            outputFile("data2.js", `let data2 = '${JSON.stringify(pointsInRange)}';`);
         });
 
         tree.range([-102.7027, 27.20032, 'C', 50000], [-94.32688, 32.02732, 'H', 500000], function (lo, hi, pointsInRange) {
             this.logger.info(`The range lo:${lo}, hi:${hi} has (${pointsInRange.length}) points.`);
-            outputJsonFile("data3.json", pointsInRange);
+            outputFile("data3.js", `let data3 = '${JSON.stringify(pointsInRange)}';`);
         });
     });
 };
