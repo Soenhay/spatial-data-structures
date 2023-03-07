@@ -39,8 +39,8 @@ function initializeOutputDirectory() {
     fs.mkdirSync(outputPath);
 }
 
-function outputJsonFile(fn, jsonObj){
-    let jsonFn =  path.resolve(outputPath, fn);
+function outputJsonFile(fn, jsonObj) {
+    let jsonFn = path.resolve(outputPath, fn);
     fs.writeFile(jsonFn, JSON.stringify(jsonObj), 'utf8', function (err) {
         if (err != null) {
             this.logger.info(err);
@@ -99,19 +99,19 @@ const main = function () {
         //Output the object to a json file:
         outputJsonFile("myJsonOutput.json", tree.toJSON());
 
-        
+
         tree.range([-102.7027, 27.20032, null, null], [-94.32688, 32.02732, null, null], function (lo, hi, pointsInRange) {
-            this.logger.info(`The range lo:${lo}, hi:${hi} has the following (${pointsInRange.length}) points:`); 
+            this.logger.info(`The range lo:${lo}, hi:${hi} has (${pointsInRange.length}) points.`);
             outputJsonFile("data1.json", pointsInRange);
         });
 
-        tree.range([-102.7027,27.20032,'C',null], [-94.32688,32.02732, 'H',null], function (lo, hi, pointsInRange) {
-            this.logger.info(`The range lo:${lo}, hi:${hi} has the following (${pointsInRange.length}) points:`); 
+        tree.range([-102.7027, 27.20032, 'C', null], [-94.32688, 32.02732, 'H', null], function (lo, hi, pointsInRange) {
+            this.logger.info(`The range lo:${lo}, hi:${hi} has (${pointsInRange.length}) points.`);
             outputJsonFile("data2.json", pointsInRange);
         });
 
-        tree.range([-102.7027,27.20032,'C', '50,000'],  [-94.32688,32.02732, 'H','500,000'], function (lo, hi, pointsInRange) {
-            this.logger.info(`The range lo:${lo}, hi:${hi} has the following (${pointsInRange.length}) points:`); 
+        tree.range([-102.7027, 27.20032, 'C', 50000], [-94.32688, 32.02732, 'H', 500000], function (lo, hi, pointsInRange) {
+            this.logger.info(`The range lo:${lo}, hi:${hi} has (${pointsInRange.length}) points.`);
             outputJsonFile("data3.json", pointsInRange);
         });
     });
