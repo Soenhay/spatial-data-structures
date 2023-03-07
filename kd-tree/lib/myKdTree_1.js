@@ -56,6 +56,21 @@ const treeRange = function (lo, hi, tree, dimensions) {
         && (hi[3] == null || hi[3] >= tree.obj[dimensions[3]])) {
         pointsInRange.push(tree.obj);
     }
+    // //Check all subtrees.
+    // //Check left subtree.
+    // if (tree.left != null) {
+    //     treeRange(lo, hi, tree.left, dimensions).forEach(element => {
+    //         pointsInRange.push(element);
+    //     });
+    // }
+    // //Check right subtree.
+    // if (tree.right != null) {
+    //     treeRange(lo, hi, tree.right, dimensions).forEach(element => {
+    //         pointsInRange.push(element);
+    //     });
+    // }
+
+    //Only check a subtree if the current node value is in range or the dimension to check is null.
     //Check left subtree.
     if (tree.left != null) {
         if (lo[tree.dimension] == null || (lo[tree.dimension] <= currDimVal)) {

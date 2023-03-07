@@ -48,7 +48,7 @@
       }
 
       points.sort(function (a, b) {
-        return a[dimensions[dim]] - b[dimensions[dim]];
+        return a[dimensions[dim]] - b[dimensions[dim]];//This code does not work for strings.
       });
 
       median = Math.floor(points.length / 2);
