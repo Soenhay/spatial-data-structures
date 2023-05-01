@@ -18,7 +18,7 @@ def plotPolygons(polygons, MBRs, BBs):
         plt.plot(*p.exterior.xy, color="lightgray")
     for i, p in enumerate(BBs):
         ax.annotate('R' + str(i), xy=(p.bounds[0],p.bounds[3]), xycoords='data', xytext=(1, 1), textcoords='offset points', horizontalalignment='left', verticalalignment='top')
-        plt.plot(*p.exterior.xy, color="blue")
+        plt.plot(*p.exterior.xy, color="red" if i==0 else "blue")
 
     #show the plot
     plt.show()
@@ -145,7 +145,8 @@ def main():
         points = [min(xs), min(ys), max(xs), max(ys)]
         idx.insert(i, points)
 
-    query_rect = [0, 0, 100, 100] # X1, Y1, X2, Y2 
+    #query_rect = [0, 0, 100, 100] # X1, Y1, X2, Y2 
+    query_rect = [25, 25, 69, 31] # X1, Y1, X2, Y2 
     #bounding_boxes = [idx.bounds(obj) for obj in idx.intersection(query_rect, objects=True)]
     bounding_boxes = []
     bounding_boxes.append(boundingBoxToPolygon(query_rect))
