@@ -16,7 +16,7 @@ def plotPolygons(polygons, MBRs, leaves, searchBoxes):
     plt.figure(2, figsize=(15, 12))
     plt.title(f'Gray MBRs({len(MBRs)}), Green Leaves({len(leaves)}), Red Search Window(1), Blue Intersected MBRs({len(searchBoxes)-1})', y=-0.1)
     plt.figure(3, figsize=(15, 12))
-    plt.title("Everything All At Once", y=-0.1)
+    plt.title("Everything Everywhere All At Once", y=-0.1)
 
     #Add the polygons
     for pltNum in (1,3):
@@ -163,8 +163,8 @@ def main():
     p.near_minimum_overlap_factor = 1
 
     #create and populate the R-tree
-    idx = index.Index(properties=p)
-    #idx = index.Rtree(properties=p)
+    #idx = index.Index(properties=p)
+    idx = index.Rtree(properties=p)
     for i, p in enumerate(MBRs):
         #idx.insert(0, (left, bottom, right, top))
         #idx.insert(0, (minX, minY, maxX, maxY))
