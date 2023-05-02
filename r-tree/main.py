@@ -31,15 +31,16 @@ def plotPolygons(polygons, MBRs, leaves, searchBoxes):
         #fig, ax = plt.subplots(figsize=(15, 12))
 
         #add the MBRs
-        for p in MBRs:
+        for i, p in enumerate(MBRs):
             plt.plot(*p.exterior.xy, color="lightgray")
+            if pltNum == 2:
+                plt.annotate('B' + str(i), xy=(p.centroid.x, p.centroid.y), xycoords='data', horizontalalignment='center', verticalalignment='center', color="lightgray")
         
         #add the leaves
         for i, p in enumerate(leaves):
-            print(p)
             p2 = boundingBoxToPolygon(p[2])
             plt.plot(*p2.exterior.xy, color="darkgreen")
-            plt.annotate(f'L{str(i)} ({len(p[1])})', xy=(p2.bounds[0],p2.bounds[3]), xycoords='data', xytext=(1, 1), textcoords='offset points', horizontalalignment='left', verticalalignment='top', color='darkgreen')
+            plt.annotate(f'L{str(p[0])} ({len(p[1])})', xy=(p2.bounds[0],p2.bounds[3]), xycoords='data', xytext=(1, 1), textcoords='offset points', horizontalalignment='left', verticalalignment='top', color='darkgreen')
 
         #add the searchBox and intersected boxes.
         for i, p in enumerate(searchBoxes):
@@ -186,6 +187,8 @@ def main():
     #print(bounding_boxes)
     leaves = idx.leaves()
     print(f'Leaves: {len(leaves)}')
+    for p in leaves:
+        print(p)
     plotPolygons(polygons, MBRs, leaves, searchBoxes)
 
 
