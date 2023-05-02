@@ -5,20 +5,46 @@ import matplotlib.pyplot as plt
 import random
 import math
 from rtree import index
+#from rtree.index import Rtree
 
 #https://stackoverflow.com/questions/55522395/how-do-i-plot-shapely-polygons-and-objects-using-matplotlib
-def plotPolygons(polygons, MBRs, BBs):
+def plotPolygons(polygons, MBRs, leaves, searchBoxes):
     # Create our figure and data we'll use for plotting
-    fig, ax = plt.subplots(figsize=(8, 6))
 
-    #Add the various plots
-    for p in polygons:
-        plt.plot(*p.exterior.xy)
-    for p in MBRs:
-        plt.plot(*p.exterior.xy, color="lightgray")
-    for i, p in enumerate(BBs):
-        ax.annotate('R' + str(i), xy=(p.bounds[0],p.bounds[3]), xycoords='data', xytext=(1, 1), textcoords='offset points', horizontalalignment='left', verticalalignment='top')
-        plt.plot(*p.exterior.xy, color="red" if i==0 else "blue")
+    plt.figure(1, figsize=(15, 12))
+    plt.title("100 Randomly Generated Polygons", y=-0.1)
+    plt.figure(2, figsize=(15, 12))
+    plt.title(f'Gray MBRs({len(MBRs)}), Green Leaves({len(leaves)}), Red Search Window(1), Blue Intersected MBRs({len(searchBoxes)-1})', y=-0.1)
+    plt.figure(3, figsize=(15, 12))
+    plt.title("Everything All At Once", y=-0.1)
+
+    #Add the polygons
+    for pltNum in (1,3):
+        plt.figure(pltNum)
+        for i, p in enumerate(polygons):
+            lastPLot = plt.plot(*p.exterior.xy)
+            lastColor = lastPLot[0].get_color()
+            plt.annotate('P' + str(i), xy=(p.centroid.x, p.centroid.y), xycoords='data', horizontalalignment='center', verticalalignment='center', color=lastColor)
+    
+    for pltNum in (2,3):
+        plt.figure(pltNum)
+        #fig, ax = plt.subplots(figsize=(15, 12))
+
+        #add the MBRs
+        for p in MBRs:
+            plt.plot(*p.exterior.xy, color="lightgray")
+        
+        #add the leaves
+        for i, p in enumerate(leaves):
+            print(p)
+            p2 = boundingBoxToPolygon(p[2])
+            plt.plot(*p2.exterior.xy, color="darkgreen")
+            plt.annotate(f'L{str(i)} ({len(p[1])})', xy=(p2.bounds[0],p2.bounds[3]), xycoords='data', xytext=(1, 1), textcoords='offset points', horizontalalignment='left', verticalalignment='top', color='darkgreen')
+
+        #add the searchBox and intersected boxes.
+        for i, p in enumerate(searchBoxes):
+            plt.plot(*p.exterior.xy, color="red" if i==0 else "blue", linewidth=2.0 if i==0 else 1.5)
+            plt.annotate('R' + str(i), xy=(p.bounds[0],p.bounds[3]), xycoords='data', xytext=(1, 1), textcoords='offset points', horizontalalignment='left', verticalalignment='top')
 
     #show the plot
     plt.show()
@@ -47,8 +73,8 @@ def point_on_circle(center, radius, angle):
 #for the random numbers that total 360: https://stackoverflow.com/questions/18659858/generating-a-list-of-random-numbers-summing-to-1
 def generatePolygon(x,y):
     #print("--------------------")
-    radius = random.randint(3,10)
-    numPoints = random.randint(3,5)
+    radius = random.randint(3,11)
+    numPoints = random.randint(3,7)
     #dirichlet gets a random distribution of numPoints numbers between 0 and 1 that total to 1. Multiply by 360 to get evenly distributed degrees between 0 and 360.
     dirichletNums = np.random.dirichlet(np.ones(numPoints),size=1) * 360
     #print(dirichletNums[0])
@@ -130,35 +156,37 @@ def main():
     #create R-tree properties
     p = index.Property()
     p.dimension = 2 # set the dimensionality of the data to 2
-    #p.fill_factor =  .75  # set the fill factor (minimum node occupancy) to 3
-    p.index_capacity = 5  # set the maximum node occupancy
-    p.leaf_capacity = 4 # set min node capacity? Doens't seem to work?
+    #p.index_capacity = 5  # defaults to 100, doesn't seem to affect it
+    p.leaf_capacity = 5 # This sets the max
+    #p.fill_factor =  .7  # set the fill factor (minimum node occupancy?)
     p.near_minimum_overlap_factor = 1
 
     #create and populate the R-tree
     idx = index.Index(properties=p)
+    #idx = index.Rtree(properties=p)
     for i, p in enumerate(MBRs):
         #idx.insert(0, (left, bottom, right, top))
         #idx.insert(0, (minX, minY, maxX, maxY))
         xs = p.exterior.coords.xy[0]
         ys = p.exterior.coords.xy[1]
-        points = [min(xs), min(ys), max(xs), max(ys)]
-        idx.insert(i, points)
+        MbrPoints = [min(xs), min(ys), max(xs), max(ys)]
+        idx.insert(i, MbrPoints, polygons[i])
 
     #query_rect = [0, 0, 100, 100] # X1, Y1, X2, Y2 
-    query_rect = [25, 25, 69, 31] # X1, Y1, X2, Y2 
+    query_rect = [25, 15, 69, 31] # X1, Y1, X2, Y2 
     #bounding_boxes = [idx.bounds(obj) for obj in idx.intersection(query_rect, objects=True)]
-    bounding_boxes = []
-    bounding_boxes.append(boundingBoxToPolygon(query_rect))
+    searchBoxes = []
+    searchBoxes.append(boundingBoxToPolygon(query_rect))
     hits =  idx.intersection(query_rect, objects=True)
     for obj in hits:
-        bounding_boxes.append(boundingBoxToPolygon(obj.bbox))
+        searchBoxes.append(boundingBoxToPolygon(obj.bbox))
     #idx.bounds(0)
     #bounding_boxes = [idx.bounds(i) for i in range(idx.get_size())]
 
     #print(bounding_boxes)
-
-    plotPolygons(polygons, MBRs, bounding_boxes)
+    leaves = idx.leaves()
+    print(f'Leaves: {len(leaves)}')
+    plotPolygons(polygons, MBRs, leaves, searchBoxes)
 
 
 
