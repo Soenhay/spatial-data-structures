@@ -3,6 +3,7 @@ or
 python -m venv ./venv
 
 ./venv/Scripts/activate
+deactivate
 
 python -m pip install --upgrade pip
 

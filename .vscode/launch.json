@@ -5,6 +5,24 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: r-tree",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/r-tree/main.py",
+            "python": "${workspaceFolder}/r-tree/venv/Scripts/python.exe",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: index-comparison",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/index-comparison/main.py",
+            "python": "${workspaceFolder}/index-comparison/venv/Scripts/python",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
