@@ -17,7 +17,7 @@ def oneFileToRuleThemAll():
         dfs.append(pd.read_csv('./index-comparison/input/flightTelem.csv', usecols = columns))
         dfs.append(pd.read_csv('./index-comparison/input/flightTelem2.csv', usecols = columns))
         df = pd.concat(dfs, ignore_index=True)
-        df.to_csv(fname, encoding='utf-8', index=False, cols = columns)
+        df.to_csv(fname, encoding='utf-8', index=False, columns = columns)
     else:
         df = pd.read_csv(fname, usecols = columns)
     return df
