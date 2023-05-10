@@ -10,6 +10,8 @@ from utils.MyQuadtreeManager import MyQuadtreeManager
 columns = ['flightId','launchDateTimeUTC','landDateTimeUTC','timeStampUtc','lat','lon','alt']
 #build the path for input data. Note that when running in debug it would duplicate the project folder so remove it with a replace. Also note that the working directory is spatial-data-structures.
 input_data_folder = Path((Path().resolve() / Path("index-comparison") / Path("input")).resolve().as_posix().replace("/index-comparison/index-comparison/", "/index-comparison/"))
+output_data_folder = Path((Path().resolve() / Path("index-comparison") / Path("output")).resolve().as_posix().replace("/index-comparison/index-comparison/", "/index-comparison/"))
+Path(output_data_folder).mkdir(parents=True, exist_ok=True) #Make sure the output directory exists.
 #print(input_data_folder)
 myTimeInfos = []
 
@@ -68,12 +70,13 @@ def main():
     
     #print(input_data_folder)
     absPath = Path(input_data_folder / 'flightAll.csv').resolve()
+    #absPath = Path(input_data_folder / 'flightTelem.csv').resolve()
     #print(fname)
     myDfMgr = MyDataframeManager(myTimeInfos, absPath, columns, 'flightId')
     myDfMgr.dfSpecs()
 
     myRtMgr = MyRtreeManager(myTimeInfos, myDfMgr.df)
-    myRtMgr.rTreePlot()
+    myRtMgr.rTreePlot(output_data_folder)
 
     # Create a diagram of the R-tree structure. DOesn't seem to work.
     #create_rtree_diagram(rt)

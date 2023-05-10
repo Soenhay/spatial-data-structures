@@ -27,9 +27,12 @@ class MyRtreeManager:
 
         #load MBR for the points in each unique flightId
         #for fid in df['flightId'].unique():
+        self.pointsByFlight = []
         for fid in self.df.index.unique():
             points = self.df.loc[[fid]][['lon', 'lat']].values.tolist()
-            envelope = MultiPoint(points).convex_hull.envelope  #
+            multi = MultiPoint(points)
+            self.pointsByFlight.append(multi)
+            envelope = multi.convex_hull.envelope  #
             minx, miny, maxx, maxy = envelope.bounds
             self.rt.insert(str(fid) + '_bb',  Rect(minx, miny, maxx, maxy))
 
@@ -45,11 +48,46 @@ class MyRtreeManager:
         return p
 
     #loop RTree and output MBRs
-    def rTreePlot(self):
+    def rTreePlot(self, outputPath):
         self.MBRs = []
         #self.rt.get_levels()   
         #self.rt.get_leaf_entries() 
         for x in self.rt.get_nodes():
             self.MBRs.append(self.__boundingRectToPolygon(x.get_bounding_rect()))
-        print(len(self.MBRs))
+        
+        #print(f'MBRs length: {len(self.MBRs)}')
+
+        import matplotlib.pyplot as plt
+        fig = plt.figure(1, figsize=(15, 12))
+        
+        #--------------------------------
+        for i, p in enumerate(self.MBRs):
+            plt.plot(*p.exterior.xy, color="lightgray", zorder=1, lw=1)
+            plt.annotate('B' + str(i), xy=(p.centroid.x, p.centroid.y), xycoords='data', horizontalalignment='center', verticalalignment='center', color="lightgray")
+
+        #--------------------------------
+        if self.pointsByFlight is not None:
+            for i, p in enumerate(self.pointsByFlight):
+                xs = [point.x for point in p.geoms]
+                ys = [point.y for point in p.geoms]
+                lastPlot = plt.scatter(xs, ys, zorder=2, s=1)
+                lastColor = lastPlot.to_rgba(0)
+                #plt.annotate('P' + str(i), xy=(p.centroid.x, p.centroid.y), xycoords='data', horizontalalignment='center', verticalalignment='center', color=lastColor)
+
+        #--------------------------------
+        textstr = '\n'.join((
+            f'MBRs={len(self.MBRs)}',
+            f'Flights={len(self.pointsByFlight)}',
+            f'Points={self.df.shape[0]}'))
+        
+        props = dict(boxstyle='round', facecolor='white', alpha=0.5)
+
+        # place a text box in upper left in axes coords
+        ax = plt.gca()
+        ax.text(0.05, 0.95, textstr, transform=ax.transAxes, fontsize=14,
+                verticalalignment='top', bbox=props)
+
+        #--------------------------------
+        fig.savefig(outputPath / 'rtree.png')   # save the figure to file
+        plt.close(fig)    # close the figure window
 
