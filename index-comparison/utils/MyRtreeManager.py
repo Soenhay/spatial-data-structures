@@ -28,6 +28,7 @@ class MyRtreeManager:
         #load MBR for the points in each unique flightId
         #for fid in df['flightId'].unique():
         self.pointsByFlight = []
+        #for fid in self.df.index.unique():
         for fid in self.df.index.unique():
             points = self.df.loc[[fid]][['lon', 'lat']].values.tolist()
             multi = MultiPoint(points)

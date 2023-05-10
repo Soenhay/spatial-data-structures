@@ -2,13 +2,14 @@ import pandas as pd
 from pathlib import Path
 
 class MyDataframeManager:
-    def __init__(self, timeInfos, absolutePathAndFilename, pandasColumns, indexCol):
+    def __init__(self, timeInfos, absolutePathAndFilename, pandasColumns, indexCols = None):
         self.timeInfos = timeInfos
         self.df = pd.read_csv(absolutePathAndFilename, usecols = pandasColumns)
         self.columns = pandasColumns
 
         #create an index on the dataframe for flightId column to make things faster.
-        self.df = self.df.set_index([indexCol])
+        if indexCols is not None:
+            self.df = self.df.set_index(indexCols)
         
 
     # def oneFileToRuleThemAll():

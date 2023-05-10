@@ -1,5 +1,6 @@
 from shapely.geometry import MultiPoint, Polygon
 from utils.MyTimeInfo import MyTimeInfo
+from pyqtree import Index
 
 class MyQuadtreeManager:
     def __init__(self, timeInfos, dataframe):
