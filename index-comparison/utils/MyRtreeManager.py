@@ -63,14 +63,14 @@ class MyRtreeManager:
         #--------------------------------
         for i, p in enumerate(self.MBRs):
             plt.plot(*p.exterior.xy, color="lightgray", zorder=1, lw=1)
-            plt.annotate('B' + str(i), xy=(p.centroid.x, p.centroid.y), xycoords='data', horizontalalignment='center', verticalalignment='center', color="lightgray")
+            plt.annotate('B' + str(i), xy=(p.centroid.x, p.centroid.y), xycoords='data', horizontalalignment='center', verticalalignment='center', color="lightgray", zorder=1)
 
         #--------------------------------
         if self.pointsByFlight is not None:
             for i, p in enumerate(self.pointsByFlight):
                 xs = [point.x for point in p.geoms]
                 ys = [point.y for point in p.geoms]
-                lastPlot = plt.scatter(xs, ys, zorder=2, s=1)
+                lastPlot = plt.scatter(xs, ys, zorder=2, s=10)
                 lastColor = lastPlot.to_rgba(0)
                 #plt.annotate('P' + str(i), xy=(p.centroid.x, p.centroid.y), xycoords='data', horizontalalignment='center', verticalalignment='center', color=lastColor)
 
