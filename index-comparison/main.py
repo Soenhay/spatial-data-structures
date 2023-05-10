@@ -1,86 +1,87 @@
 import pyfiglet
-import numpy as np, numpy.random
+#import numpy as np, numpy.random
 import matplotlib.pyplot as plt
-import pandas as pd
-from rtreelib import RTree, Rect, Point
-from rtreelib.diagram import create_rtree_diagram #not practical for large trees.
 from pathlib import Path
-import time
-from shapely.geometry import MultiPoint, Polygon
+from lib.MyDataframeManager import MyDataframeManager
+from lib.MyTimeInfo import MyTimeInfo
+from lib.MyRtreeManager import MyRtreeManager
+from lib.MyQuadtreeManager import MyQuadtreeManager
 
 columns = ['flightId','launchDateTimeUTC','landDateTimeUTC','timeStampUtc','lat','lon','alt']
 #build the path for input data. Note that when running in debug it would duplicate the project folder so remove it with a replace. Also note that the working directory is spatial-data-structures.
 input_data_folder = Path((Path().resolve() / Path("index-comparison") / Path("input")).resolve().as_posix().replace("/index-comparison/index-comparison/", "/index-comparison/"))
 #print(input_data_folder)
+myTimeInfos = []
 
-def loadAll():
-    print(input_data_folder)
-    fname = Path(input_data_folder / 'flightAll.csv').resolve()
-    print(fname)
-    df = pd.read_csv(fname, usecols = columns)
-    return df
+#https://stackoverflow.com/questions/55522395/how-do-i-plot-shapely-polygons-and-objects-using-matplotlib
+def plotPolygons(Points, MBRs, searchBoxes):
+    # Create our figure and data we'll use for plotting
 
-def oneFileToRuleThemAll():
-    df = None
-    fname = input_data_folder / 'flightTelemAll.csv'
+    #plt.figure(1, figsize=(15, 12))
+    #plt.title("100 Randomly Generated Polygons", y=-0.1)
+    plt.figure(2, figsize=(15, 12))
+    plt.title(f'Gray MBRs({len(MBRs)}), Green Points({len(Points)}), Red Search Window(1), Blue Intersected MBRs({len(searchBoxes)-1})', y=-0.1)
+    #plt.figure(3, figsize=(15, 12))
+    #plt.title("Everything Everywhere All At Once", y=-0.1)
 
-    if not Path.isfile(fname):
-        dfs = []
-        #Relative paths are relative to current working directory. Since this project is in a sub folder the path needs to include it.
-        dfs.append(pd.read_csv(input_data_folder / 'flightAdsb.csv', usecols = columns))
-        dfs.append(pd.read_csv(input_data_folder / 'flightTelem.csv', usecols = columns))
-        dfs.append(pd.read_csv(input_data_folder / 'flightTelem2.csv', usecols = columns))
-        df = pd.concat(dfs, ignore_index=True)
-        df.to_csv(fname, encoding='utf-8', index=False, columns = columns)
-    else:
-        df = pd.read_csv(fname, usecols = columns)
-    return df
-
-def dfSpecs(df):
-    #print(f'Row count: {len(df.index)}')
-    print(f'Row count: {df.shape[0]}')
-    #print(f'Row count: {ddf[df.columns[0]].count()}')
-    print(f'Column count: {len(df.columns)}')
-    print(f'Memory usage: \n{df.memory_usage()}')
+    #Add the polygons
+    for pltNum in (1,3):
+        plt.figure(pltNum)
+        for i, p in enumerate(polygons):
+            lastPLot = plt.plot(*p.exterior.xy)
+            lastColor = lastPLot[0].get_color()
+            plt.annotate('P' + str(i), xy=(p.centroid.x, p.centroid.y), xycoords='data', horizontalalignment='center', verticalalignment='center', color=lastColor)
     
+    for pltNum in (2,3):
+        plt.figure(pltNum)
+        #fig, ax = plt.subplots(figsize=(15, 12))
 
-def loadRtree(df):
-    print(f'Loading RTree, this might take a while...')
-    rt = RTree(max_entries=7)
+        #add the MBRs
+        for i, p in enumerate(MBRs):
+            plt.plot(*p.exterior.xy, color="lightgray")
+            if pltNum == 2:
+                plt.annotate('B' + str(i), xy=(p.centroid.x, p.centroid.y), xycoords='data', horizontalalignment='center', verticalalignment='center', color="lightgray")
+        
+        #add the leaves
+        for i, p in enumerate(leaves):
+            p2 = boundingBoxToPolygon(p[2])
+            plt.plot(*p2.exterior.xy, color="darkgreen")
+            plt.annotate(f'L{str(p[0])} ({len(p[1])})', xy=(p2.bounds[0],p2.bounds[3]), xycoords='data', xytext=(1, 1), textcoords='offset points', horizontalalignment='left', verticalalignment='top', color='darkgreen')
 
-    start = time.time()
+        #add the searchBox and intersected boxes.
+        for i, p in enumerate(searchBoxes):
+            plt.plot(*p.exterior.xy, color="red" if i==0 else "blue", linewidth=2.0 if i==0 else 1.5)
+            plt.annotate('R' + str(i), xy=(p.bounds[0],p.bounds[3]), xycoords='data', xytext=(1, 1), textcoords='offset points', horizontalalignment='left', verticalalignment='top')
 
-    #load each point into the Rtree
-    for index, row in df.iterrows():
-        #flightId = row[0]
-        rt.insert(str(row['flightId']), Rect(row['lon'], row['lat'], row['lon'], row['lat']))
-
-    #create an index on the dataframe for flightId column to make things faster.
-    df = df.set_index(['flightId'])
-
-    #load MBR for the points in each unique flightId
-    #for fid in df['flightId'].unique():
-    for fid in df.index.unique():
-        points = df.loc[[str(fid)]][['lon', 'lat']].values.tolist()
-        envelope = MultiPoint(points).convex_hull.envelope  #
-        minx, miny, maxx, maxy = envelope.bounds
-        rt.insert(str(fid) + '_bb',  Rect(minx, miny, maxx, maxy))
-
-    end = time.time()
-    print(f'Elapsed: {end - start}')
+    #show the plot
+    plt.show()
 
 
 def main():
     intro = pyfiglet.figlet_format("Index Comparison")
     print(intro)
+    
+    tiAll = MyTimeInfo("Entire Program")
+    myTimeInfos.append(tiAll)
+    tiAll.start()
 
-    #df = oneFileToRuleThemAll()
-    df = loadAll()
-    dfSpecs(df)
+    
+    #print(input_data_folder)
+    absPath = Path(input_data_folder / 'flightAll.csv').resolve()
+    #print(fname)
+    myDfMgr = MyDataframeManager(myTimeInfos, absPath, columns, 'flightId')
+    myDfMgr.dfSpecs()
 
-    loadRtree(df)
+    myRtMgr = MyRtreeManager(myTimeInfos, myDfMgr.df)
+    myRtMgr.rTreePlot()
 
     # Create a diagram of the R-tree structure. DOesn't seem to work.
     #create_rtree_diagram(rt)
+ 
+    tiAll.end()
+    print('==========Time Information=========')
+    for x in myTimeInfos:
+        print(f'{x.name}, Elapse: {x.elapsed}')
+    print('==========      END       =========')
 
 main()
