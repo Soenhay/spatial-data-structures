@@ -34,7 +34,7 @@ class MyDataframeManager:
         print(f'Row count: {self.df.shape[0]}')
         #print(f'Row count: {ddf[df.columns[0]].count()}')
         print(f'Column count: {len(self.df.columns)}')
-        print(f'Memory usage: \n{self.df.memory_usage()}')
+        print(f'Memory usage: \n{self.df.memory_usage(deep=True)}')
 
     
     def getPoints(self):

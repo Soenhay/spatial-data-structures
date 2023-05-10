@@ -3,6 +3,8 @@ from rtreelib.diagram import create_rtree_diagram #not practical for large trees
 from shapely.geometry import MultiPoint, Polygon
 from utils.MyTimeInfo import MyTimeInfo
 from utils.MiscUtility import boundingBoxToPolygon
+import random
+from shapely import geometry
 
 class MyRtreeManager:
     def __init__(self, timeInfos, dataframe):
@@ -38,6 +40,8 @@ class MyRtreeManager:
             self.rt.insert(str(fid) + '_bb',  Rect(minx, miny, maxx, maxy))
 
         ti.end()
+
+        self.generateSearchWindowPolygons(self.rt.root.get_bounding_rect())
         #print(f'Elapsed: {ti.elapsed()}')
 
         
@@ -61,12 +65,12 @@ class MyRtreeManager:
         import matplotlib.pyplot as plt
         fig = plt.figure(1, figsize=(15, 12))
         
-        #--------------------------------
+        #--------------------------------Minimum Bounding Rectangles
         for i, p in enumerate(self.MBRs):
             plt.plot(*p.exterior.xy, color="lightgray", zorder=1, lw=1)
             plt.annotate('B' + str(i), xy=(p.centroid.x, p.centroid.y), xycoords='data', horizontalalignment='center', verticalalignment='center', color="lightgray", zorder=1)
 
-        #--------------------------------
+        #--------------------------------points colored by flight
         if self.pointsByFlight is not None:
             for i, p in enumerate(self.pointsByFlight):
                 xs = [point.x for point in p.geoms]
@@ -74,6 +78,12 @@ class MyRtreeManager:
                 lastPlot = plt.scatter(xs, ys, zorder=2, s=10)
                 lastColor = lastPlot.to_rgba(0)
                 #plt.annotate('P' + str(i), xy=(p.centroid.x, p.centroid.y), xycoords='data', horizontalalignment='center', verticalalignment='center', color=lastColor)
+
+        #--------------------------------search windows
+        if self.searchPolygons is not None:
+            for i, p in enumerate(self.searchPolygons):
+                plt.plot(*p.exterior.xy, color="red", zorder=3, lw=2)
+                plt.annotate('S' + str(i), xy=(p.centroid.x, p.centroid.y), xycoords='data', horizontalalignment='center', verticalalignment='center', color="red", zorder=3)
 
         #--------------------------------
         textstr = '\n'.join((
@@ -91,4 +101,23 @@ class MyRtreeManager:
         #--------------------------------
         fig.savefig(outputPath / 'rtree.png')   # save the figure to file
         plt.close(fig)    # close the figure window
+
+
+    def generateSearchWindowPolygons(self, bbox):
+        X1, Y1, X2, Y2 = [bbox.min_x, bbox.min_y, bbox.max_x, bbox.max_y]
+        xrange = X2 - X1
+        yrange = Y2 - Y1
+        xlMax=X2 - (xrange * .25)
+        xrPad=(xrange * .05)
+        ybMax=Y2 - (yrange * .25)
+        ybPad=(yrange * .05)
+
+        self.searchPolygons = []
+        for i in range (0,10):
+            xl = round(random.uniform(X1, xlMax), 5)
+            xr = round(random.uniform(xl + xrPad, X2), 5)
+            yb = round(random.uniform(Y1, ybMax), 5)
+            yt = round(random.uniform(yb + ybPad, Y2), 5)
+            rect = geometry.Polygon([(xl, yb), (xl, yt), (xr, yt), (xr, yb), (xl, yb)])
+            self.searchPolygons.append(rect)
 

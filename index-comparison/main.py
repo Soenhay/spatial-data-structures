@@ -70,8 +70,9 @@ def main():
     
     #print(input_data_folder)
     #absPath = Path(input_data_folder / 'flightAll.csv').resolve()
+    absPath = Path(input_data_folder / 'flightAll_modified_1.csv').resolve()
     #absPath = Path(input_data_folder / 'flightTelem.csv').resolve()
-    absPath = Path(input_data_folder / 'flightTelem_modified_2.csv').resolve()
+    #absPath = Path(input_data_folder / 'flightTelem_modified_2.csv').resolve()
     #print(fname)
     #myDfMgr = MyDataframeManager(myTimeInfos, absPath, columns, ['flightId', 'timeStampUtc'])
     myDfMgr = MyDataframeManager(myTimeInfos, absPath, columns, ['flightId'])
