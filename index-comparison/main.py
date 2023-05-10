@@ -2,10 +2,10 @@ import pyfiglet
 #import numpy as np, numpy.random
 import matplotlib.pyplot as plt
 from pathlib import Path
-from lib.MyDataframeManager import MyDataframeManager
-from lib.MyTimeInfo import MyTimeInfo
-from lib.MyRtreeManager import MyRtreeManager
-from lib.MyQuadtreeManager import MyQuadtreeManager
+from utils.MyDataframeManager import MyDataframeManager
+from utils.MyTimeInfo import MyTimeInfo
+from utils.MyRtreeManager import MyRtreeManager
+from utils.MyQuadtreeManager import MyQuadtreeManager
 
 columns = ['flightId','launchDateTimeUTC','landDateTimeUTC','timeStampUtc','lat','lon','alt']
 #build the path for input data. Note that when running in debug it would duplicate the project folder so remove it with a replace. Also note that the working directory is spatial-data-structures.
