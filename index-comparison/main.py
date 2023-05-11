@@ -84,8 +84,8 @@ def main():
     myRtMgr = MyRtreeManager(myTimeInfos, myDfMgr.df)
     myRtMgr.rTreePlot(output_data_folder)
 
-    # Create a diagram of the R-tree structure. DOesn't seem to work.
-    #create_rtree_diagram(rt)
+    myQtMgr = MyQuadtreeManager(myTimeInfos, myDfMgr.df)
+    myQtMgr.qTreePlot(output_data_folder)
  
     tiAll.end()
     print('==========Time Information=========')

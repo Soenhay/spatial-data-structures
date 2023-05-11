@@ -5,6 +5,7 @@ from utils.MyTimeInfo import MyTimeInfo
 from utils.MiscUtility import boundingBoxToPolygon
 import random
 from shapely import geometry
+import time
 
 class MyRtreeManager:
     def __init__(self, timeInfos, dataframe):
@@ -95,6 +96,7 @@ class MyRtreeManager:
             f'Leaves={len(list(self.rt.get_leaves()))}',
             f'Leaf Entries={len(list(self.rt.get_leaf_entries()))}',
             f'Levels={len(list(self.rt.get_levels()))}',
+            f'(m,M)=({self.rt.min_entries},{self.rt.max_entries})',
             f'Flights={len(self.pointsByFlight)}',
             f'Points={self.df.shape[0]}'))
         
@@ -106,7 +108,8 @@ class MyRtreeManager:
                 verticalalignment='top', bbox=props)
 
         #--------------------------------
-        fig.savefig(outputPath / 'rtree.png')   # save the figure to file
+        timeStr = time.strftime('%Y%m%d_%H%M%S', time.localtime())
+        fig.savefig(outputPath / f'rtree_{timeStr}.png')   # save the figure to file
         plt.close(fig)    # close the figure window
 
 
@@ -144,14 +147,27 @@ class MyRtreeManager:
         return Rect(min(xs), min(ys), max(xs), max(ys))
 
 
-    # def recursiveQuery(self, entries, rect):
-    #     total = 0
-    #     for entry in entries:
-    #         if entry.data is not None:
-    #            total += 1
-    #         else:
-    #             total += self.recursiveQuery(entry.entries, rect)
-    #     return total
+    def recursiveParseNodes(self, entries):
+        total = 0
+        for entry in entries:
+            if entry.is_leaf:
+                if hasattr(entry, "entries"):
+                    total += len(entry.entries)
+                elif hasattr(entry, "data") and entry.data is not None:
+                    total += 1
+                else:
+                    print('MyRtreeManager: unhandled case 1')
+            elif hasattr(entry, "entries") and entry.entries is not None:
+                total += self.recursiveParseNodes(entry.entries)
+            elif not entry.is_leaf:
+                total += self.recursiveParseNodes(entry.child.entries)
+            # elif hasattr(entry, "data") and entry.data is not None:
+            #    total += 1
+            # elif hasattr(entry, "child") and entry.child.entries is not None:
+            #     total += self.recursiveParseNodes(entry.child.entries)
+            else:
+                print('MyRtreeManager: unhandled case 2')
+        return total
     
 
     def performQueries(self):
@@ -165,7 +181,10 @@ class MyRtreeManager:
                 ti.start()
                 rect = self.polygonToRect(p)
                 entries = self.rt.query(rect)
+                #entries3 = self.rt.query_nodes(rect, leaves=False)
+                #ti.resultCount = self.recursiveParseNodes(list(self.rt.query_nodes(rect, leaves=False)))
+                #ti.resultCount = self.recursiveParseNodes(list(self.rt.query_nodes(rect)))
+                ti.resultCount = sum([len(e.entries) for e in list(self.rt.query_nodes(rect))])
                 ti.end()
-                ti.resultCount = len(list(entries))
             to.end()
             to.resultCount = len(self.searchPolygons)

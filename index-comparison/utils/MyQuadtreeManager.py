@@ -33,3 +33,6 @@ class MyQuadtreeManager:
 
         ti.end()
         #print(f'Elapsed: {ti.elapsed()}')
+
+    def qTreePlot(self, outputPath):
+        return 0
