@@ -13,7 +13,7 @@ class MyQuadtreeManager:
         print(f'Loading QuadTree, this might take a while...')
         #self.qt = QuadTree(max_entries=7)
 
-        ti = MyTimeInfo("Load Rtree")
+        ti = MyTimeInfo("Load Quadtree", "quadtree_load")
         self.timeInfos.append(ti)
         ti.start()
 

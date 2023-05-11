@@ -6,6 +6,8 @@ from utils.MyDataframeManager import MyDataframeManager
 from utils.MyTimeInfo import MyTimeInfo
 from utils.MyRtreeManager import MyRtreeManager
 from utils.MyQuadtreeManager import MyQuadtreeManager
+from csv import writer
+import time
 
 columns = ['flightId','launchDateTimeUTC','landDateTimeUTC','timeStampUtc','lat','lon','alt']
 #build the path for input data. Note that when running in debug it would duplicate the project folder so remove it with a replace. Also note that the working directory is spatial-data-structures.
@@ -63,7 +65,7 @@ def main():
     intro = pyfiglet.figlet_format("Index Comparison")
     print(intro)
     
-    tiAll = MyTimeInfo("Entire Program")
+    tiAll = MyTimeInfo("Entire Program", "main")
     myTimeInfos.append(tiAll)
     tiAll.start()
 
@@ -87,8 +89,39 @@ def main():
  
     tiAll.end()
     print('==========Time Information=========')
+    print(MyTimeInfo.csvColumns())
     for x in myTimeInfos:
-        print(f'{x.name}, Elapse: {x.elapsed}')
+        print(','.join([str(i) for i in x.toArray()]))
     print('==========      END       =========')
+
+    
+    # Create or Open our existing CSV file in append mode allowing reading for checking row count.
+    # Create a file object for this file
+    with open(output_data_folder / 'metrics.csv', 'a+', newline='') as f_object:
+        timeEnd = time.strftime('%m/%d/%Y %H:%M:%S', time.localtime())
+        
+        # Pass this file object to csv.writer()
+        # and get a writer object
+        writer_object = writer(f_object)
+        
+        f_object.seek(0,0)#set seek to begining to get row count
+        rowCount = sum(1 for row in f_object)
+        f_object.seek(rowCount,0)#set seek back to rowcount
+
+        if rowCount == 0:
+            #add the column headers if they did not exist.
+            List = ['timeEnd'] + MyTimeInfo.csvColumns()
+            writer_object.writerow(List)
+
+        for ti in myTimeInfos:
+            # List that we want to add as a new row (time info)
+            List = [timeEnd] + ti.toArray()
+        
+            # Pass the list as an argument into
+            # the writerow()
+            writer_object.writerow(List)
+    
+        # Close the file object
+        f_object.close()
 
 main()
