@@ -124,7 +124,7 @@ class MyRtreeManager:
 
         self.searchPolygons = []
         self.searchPolygons.append(self.rectToPolygon(bbox))#add the entire bounds
-        for i in range (0,10):
+        for i in range (0,20):
             xl = round(random.uniform(X1, xlMax), 5)
             xr = round(random.uniform(xl + xrPad, X2), 5)
             yb = round(random.uniform(Y1, ybMax), 5)
